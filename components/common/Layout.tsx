@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { Container } from '@interchain-ui/react';
+import { Container } from '@/components/ui';
 import { Header } from './Header';
 
 export function Layout({ children }: { children: React.ReactNode }) {

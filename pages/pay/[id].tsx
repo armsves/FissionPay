@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Box, Stack, Button as UIButton, Text, useColorModeValue } from '@interchain-ui/react';
-import { useChain } from '@interchain-kit/react';
+import { Box, Stack, Button as UIButton, Text, useColorModeValue } from '@/components/ui';
+import { useChain } from '@/components/wallet/ChainProvider';
 import { useAccount, useConnect, useDisconnect, useWalletClient, useSwitchChain } from 'wagmi';
 import { chains, assetLists } from '@chain-registry/v2';
 import { Layout } from '@/components';
@@ -14,7 +14,10 @@ import { ChainSelect } from '@/components/wallet/Chain';
 // Extend Window interface for Keplr and Ethereum
 declare global {
   interface Window {
-    keplr?: any;
+    keplr?: {
+      enable: (chainId: string) => Promise<void>;
+      getKey: (chainId: string) => Promise<{ bech32Address: string }>;
+    };
     ethereum?: any;
   }
 }
@@ -510,7 +513,7 @@ function PaymentPageContent() {
                       onChange={async (chainName) => {
                         if (chainName) {
                           const chain = chains.find(c => c.chainName === chainName);
-                          if (chain && window.keplr) {
+                          if (chain && chain.chainId && window.keplr) {
                             try {
                               // Enable the selected chain in Keplr
                               await window.keplr.enable(chain.chainId);

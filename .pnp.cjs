@@ -27,6 +27,7 @@ const RAW_RUNTIME_STATE =
       [null, {\
         "packageLocation": "./",\
         "packageDependencies": [\
+          ["@chain-registry/v2", "npm:1.71.237"],\
           ["@chain-registry/v2-types", "npm:0.53.146"],\
           ["@emotion/react", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:11.10.6"],\
           ["@emotion/styled", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:11.10.6"],\
@@ -35,7 +36,6 @@ const RAW_RUNTIME_STATE =
           ["@interchain-kit/leap-extension", "npm:0.3.55"],\
           ["@interchain-kit/react", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:0.3.55"],\
           ["@interchain-ui/react", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:1.26.3"],\
-          ["@interchain-ui/react-no-ssr", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:0.1.13"],\
           ["@skip-go/client", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:1.5.9"],\
           ["@tanstack/react-query", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:5.90.5"],\
           ["@types/node", "npm:24.9.2"],\
@@ -321,6 +321,16 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "../../.yarn/berry/cache/@chain-registry-types-npm-2.0.93-18beb00fcc-10c0.zip/node_modules/@chain-registry/types/",\
         "packageDependencies": [\
           ["@chain-registry/types", "npm:2.0.93"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@chain-registry/v2", [\
+      ["npm:1.71.237", {\
+        "packageLocation": "../../.yarn/berry/cache/@chain-registry-v2-npm-1.71.237-9a62f34508-10c0.zip/node_modules/@chain-registry/v2/",\
+        "packageDependencies": [\
+          ["@chain-registry/v2", "npm:1.71.237"],\
+          ["@chain-registry/v2-types", "npm:0.53.146"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -1396,6 +1406,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@hyperweb/connect-multi-chain", "workspace:."],\
+          ["@chain-registry/v2", "npm:1.71.237"],\
           ["@chain-registry/v2-types", "npm:0.53.146"],\
           ["@emotion/react", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:11.10.6"],\
           ["@emotion/styled", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:11.10.6"],\
@@ -1404,7 +1415,6 @@ const RAW_RUNTIME_STATE =
           ["@interchain-kit/leap-extension", "npm:0.3.55"],\
           ["@interchain-kit/react", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:0.3.55"],\
           ["@interchain-ui/react", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:1.26.3"],\
-          ["@interchain-ui/react-no-ssr", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:0.1.13"],\
           ["@skip-go/client", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:1.5.9"],\
           ["@tanstack/react-query", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:5.90.5"],\
           ["@types/node", "npm:24.9.2"],\
@@ -1789,32 +1799,6 @@ const RAW_RUNTIME_STATE =
           ["react-dom", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:19.2.0"],\
           ["react-stately", "virtual:d7b715551fc6133414b645e02dd08f5a7ac0e59ae1781e1d4aa1ebf1d836e3ddc31196c3119b3fb559f9730730661e2389a63a959a45f1b6d9c854af9b52c4a3#npm:3.42.0"],\
           ["zustand", "virtual:d7b715551fc6133414b645e02dd08f5a7ac0e59ae1781e1d4aa1ebf1d836e3ddc31196c3119b3fb559f9730730661e2389a63a959a45f1b6d9c854af9b52c4a3#npm:4.5.7"]\
-        ],\
-        "packagePeers": [\
-          "@types/react-dom",\
-          "@types/react",\
-          "react-dom",\
-          "react"\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["@interchain-ui/react-no-ssr", [\
-      ["npm:0.1.13", {\
-        "packageLocation": "../../.yarn/berry/cache/@interchain-ui-react-no-ssr-npm-0.1.13-6304c91e9c-10c0.zip/node_modules/@interchain-ui/react-no-ssr/",\
-        "packageDependencies": [\
-          ["@interchain-ui/react-no-ssr", "npm:0.1.13"]\
-        ],\
-        "linkType": "SOFT"\
-      }],\
-      ["virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:0.1.13", {\
-        "packageLocation": "./.yarn/__virtual__/@interchain-ui-react-no-ssr-virtual-3c36903e27/3/.yarn/berry/cache/@interchain-ui-react-no-ssr-npm-0.1.13-6304c91e9c-10c0.zip/node_modules/@interchain-ui/react-no-ssr/",\
-        "packageDependencies": [\
-          ["@interchain-ui/react-no-ssr", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:0.1.13"],\
-          ["@types/react", "npm:19.2.2"],\
-          ["@types/react-dom", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:19.2.1"],\
-          ["react", "npm:19.2.0"],\
-          ["react-dom", "virtual:b19b29f7af941f63c62bbae325a1719ae67ac3a25b84e36b79699789be961e757fceb84d05f3267a30df55591835e9246f39405fe2ca9f98f724ddfadd79cf15#npm:19.2.0"]\
         ],\
         "packagePeers": [\
           "@types/react-dom",\

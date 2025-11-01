@@ -5,7 +5,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-} from "@interchain-ui/react";
+} from "@/components/ui";
 
 export type WarningProps = {
   text: string;

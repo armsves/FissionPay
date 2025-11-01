@@ -4,9 +4,9 @@ import {
   ClipboardCopyText,
   Stack,
   useColorModeValue,
-} from "@interchain-ui/react";
-import { WalletState as WalletStatus } from "@interchain-kit/core";
-import { useChain } from "@interchain-kit/react";
+} from "@/components/ui";
+import { WalletStatus } from "@/components/wallet/ChainProvider";
+import { useChain } from "@/components/wallet/ChainProvider";
 import { chains } from "@chain-registry/v2";
 import { User } from "./User";
 import { Warning } from "./Warning";

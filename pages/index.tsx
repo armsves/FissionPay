@@ -1,5 +1,5 @@
 import { Layout } from "@/components";
-import { Box, Stack, Button as UIButton, Text } from '@interchain-ui/react';
+import { Box, Stack, Button as UIButton, Text } from '@/components/ui';
 import Link from 'next/link';
 
 export default function Home() {

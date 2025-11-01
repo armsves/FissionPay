@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Box, Stack, Text, useColorModeValue } from "@interchain-ui/react";
+import { Box, Stack, Text, useColorModeValue } from "@/components/ui";
 import { Astronaut } from "./Astronaut";
 
 export type UserProps = {

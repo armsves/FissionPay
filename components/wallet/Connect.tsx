@@ -1,5 +1,7 @@
 import { MouseEventHandler } from "react";
-import { Button as UIButton, IconName } from "@interchain-ui/react";
+import { Button as UIButton } from "@/components/ui";
+
+export type IconName = string;
 
 export type ButtonProps = {
   text?: string;

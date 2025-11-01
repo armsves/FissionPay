@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Stack, Button as UIButton, Text, useColorModeValue } from '@interchain-ui/react';
+import { Box, Stack, Button as UIButton, Text, useColorModeValue } from '@/components/ui';
 import { QRCodeSVG } from 'qrcode.react';
-import { useChain } from '@interchain-kit/react';
-import { WalletState as WalletStatus } from '@interchain-kit/core';
+import { useChain } from '@/components/wallet/ChainProvider';
+import { WalletStatus } from '@/components/wallet/ChainProvider';
 import { Bill } from '@/pages/api/bills';
 import { formatAmount } from '@/utils/wallet';
 import { ButtonConnect, ButtonConnected, ButtonConnecting, ButtonDisconnected } from '@/components/wallet/Connect';
@@ -101,7 +101,7 @@ function MerchantDashboardContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           merchantAddress: address, // Noble address (Cosmos address from Keplr)
-          merchantChainId: chain.chainId || 'noble-1', // Noble chain ID
+          merchantChainId: chain.chainName ? `${chain.chainName}-1` : 'noble-1', // Noble chain ID
           totalAmount: amount,
         }),
       });

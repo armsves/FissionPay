@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = {
   reactStrictMode: true,
-  swcMinify: true,
+  // Path aliases are handled by tsconfig.json, but keeping webpack config for compatibility
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -12,4 +12,6 @@ module.exports = {
     };
     return config;
   },
+  // Add empty turbopack config to silence the error when using webpack
+  turbopack: {},
 };

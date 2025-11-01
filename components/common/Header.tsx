@@ -3,7 +3,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-} from "@interchain-ui/react";
+} from "@/components/ui";
 import Link from "next/link";
 
 export function Header() {

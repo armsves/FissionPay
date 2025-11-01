@@ -10,7 +10,7 @@ import {
   Text,
   ThemeProvider,
   useTheme,
-} from '@interchain-ui/react';
+} from '@/components/ui';
 
 export type ChainSelectProps = {
   chains: Chain[];
@@ -101,7 +101,7 @@ export function ChainSelect({
                 src={avatar}
                 fallbackMode="bg"
                 attributes={{
-                  paddingX: '$4',
+                  style: { paddingLeft: '1rem', paddingRight: '1rem' },
                 }}
               />
             ) : (
@@ -109,21 +109,18 @@ export function ChainSelect({
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
-                px="$4"
+                px="1rem"
               >
-                <Skeleton width="24px" height="24px" borderRadius="$full" />
+                <Skeleton width="24px" height="24px" borderRadius="50%" />
               </Box>
             )
           }
           styleProps={{
-            width: {
-              mobile: '100%',
-              mdMobile: '350px',
-            },
+            width: '100%',
           }}
         >
           {options.map((option) => (
-            <Combobox.Item key={option.value} textValue={option.label}>
+            <Combobox.Item key={option.value} textValue={option.value}>
               <ChainOption
                 logo={option.logo ?? ''}
                 label={option.label ?? ''}
@@ -140,7 +137,7 @@ function ChainOption({ logo, label }: { logo: string; label: string }) {
   return (
     <Stack
       direction="horizontal"
-      space="$4"
+      space="1rem"
       attributes={{ alignItems: 'center' }}
     >
       <Avatar
@@ -151,7 +148,7 @@ function ChainOption({ logo, label }: { logo: string; label: string }) {
         fallbackMode="initials"
       />
 
-      <Text fontSize="$md" fontWeight="$normal" color="$text">
+      <Text fontSize="1rem" fontWeight="normal" color="#000000">
         {label}
       </Text>
     </Stack>
