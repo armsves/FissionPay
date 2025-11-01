@@ -1,35 +1,40 @@
 // Basic UI components to replace @interchain-ui/react
 import React from 'react';
+import { colors } from '@/config/colors';
 
-// Token mapping utility
+// Token mapping utility with professional color palette
 const tokenMap: Record<string, string> = {
-  '$white': '#ffffff',
-  '$black': '#000000',
+  '$white': colors.background.light,
+  '$black': colors.text.primary,
   '$blackAlpha500': 'rgba(0, 0, 0, 0.5)',
   '$blackAlpha200': 'rgba(0, 0, 0, 0.2)',
   '$blackAlpha700': 'rgba(0, 0, 0, 0.7)',
   '$whiteAlpha100': 'rgba(255, 255, 255, 0.1)',
   '$whiteAlpha700': 'rgba(255, 255, 255, 0.7)',
-  '$gray100': '#f3f4f6',
-  '$gray200': '#e5e7eb',
-  '$gray300': '#d1d5db',
-  '$gray400': '#9ca3af',
-  '$gray500': '#6b7280',
-  '$gray700': '#374151',
-  '$gray800': '#1f2937',
-  '$purple300': '#c4b5fd',
-  '$purple600': '#9333ea',
-  '$primary200': '#c4b5fd',
-  '$primary500': '#9333ea',
-  '$green500': '#10b981',
-  '$green600': '#059669',
-  '$green50': '#f0fdf4',
-  '$green900': '#14532d',
-  '$red500': '#ef4444',
-  '$orange200': '#fed7aa',
-  '$orange300': '#fdba74',
-  '$text': '#000000',
-  '$background': '#ffffff',
+  '$gray50': colors.gray[50],
+  '$gray100': colors.gray[100],
+  '$gray200': colors.gray[200],
+  '$gray300': colors.gray[300],
+  '$gray400': colors.gray[400],
+  '$gray500': colors.gray[500],
+  '$gray600': colors.gray[600],
+  '$gray700': colors.gray[700],
+  '$gray900': colors.gray[900],
+  '$purple300': colors.primary[300],
+  '$purple600': colors.primary[600],
+  '$purple700': colors.primary[700],
+  '$primary200': colors.primary[200],
+  '$primary500': colors.primary[500],
+  '$primary600': colors.primary[600],
+  '$green500': colors.success[500],
+  '$green600': colors.success[600],
+  '$green50': colors.success[50],
+  '$green900': colors.success[900],
+  '$red500': colors.error[500],
+  '$orange200': colors.warning[200],
+  '$orange300': colors.warning[300],
+  '$text': colors.text.primary,
+  '$background': colors.background.light,
   '$2': '0.125rem',
   '$3': '0.1875rem',
   '$4': '0.25rem',
@@ -51,6 +56,8 @@ const tokenMap: Record<string, string> = {
   '$xl': '1.25rem',
   '$2xl': '1.5rem',
   '$3xl': '1.875rem',
+  '$4xl': '2.25rem',
+  '$5xl': '3rem',
   '$light': '300',
   '$normal': '400',
   '$medium': '500',
@@ -326,18 +333,19 @@ export function Button({
 
   const variantStyles = {
     solid: {
-      backgroundColor: '#6366f1',
-      color: 'white',
+      backgroundColor: colors.primary[600],
+      color: colors.background.light,
       border: 'none',
+      boxShadow: '0 4px 6px -1px rgba(124, 58, 237, 0.3)',
     },
     outlined: {
       backgroundColor: 'transparent',
-      color: '#6366f1',
-      border: '1px solid #6366f1',
+      color: colors.primary[600],
+      border: `1px solid ${colors.primary[600]}`,
     },
     ghost: {
       backgroundColor: 'transparent',
-      color: '#6366f1',
+      color: colors.primary[600],
       border: 'none',
     },
   };
@@ -356,7 +364,23 @@ export function Button({
   };
 
   return (
-    <button style={styles} disabled={disabled || isLoading} {...props}>
+    <button 
+      style={styles} 
+      disabled={disabled || isLoading} 
+      {...props}
+      onMouseEnter={(e) => {
+        if (!disabled && !isLoading && variant === 'solid') {
+          e.currentTarget.style.transform = 'translateY(-1px)';
+          e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(124, 58, 237, 0.4), 0 4px 6px -2px rgba(124, 58, 237, 0.3)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled && !isLoading && variant === 'solid') {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(124, 58, 237, 0.3)';
+        }
+      }}
+    >
       {leftIcon}
       {isLoading ? 'Loading...' : children}
     </button>
@@ -404,6 +428,64 @@ export function Container({
   );
 }
 
+// Input component
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+}
+
+export function Input({ label, error, helperText, style, ...props }: InputProps) {
+  return (
+    <div style={{ width: '100%' }}>
+      {label && (
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '0.5rem', 
+          fontSize: '0.875rem', 
+          fontWeight: 500,
+          color: colors.text.primary 
+        }}>
+          {label}
+        </label>
+      )}
+      <input
+        {...props}
+        style={{
+          width: '100%',
+          padding: '0.875rem 1rem',
+          fontSize: '1rem',
+          borderRadius: '0.5rem',
+          border: error ? `1px solid ${colors.error[500]}` : `1px solid ${colors.border.light}`,
+          backgroundColor: colors.background.light,
+          color: colors.text.primary,
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+          outline: 'none',
+          ...style,
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = colors.primary[600];
+          e.currentTarget.style.boxShadow = `0 0 0 3px ${colors.primary[100]}`;
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = error ? colors.error[500] : colors.border.light;
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      />
+      {error && (
+        <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: colors.error[500] }}>
+          {error}
+        </div>
+      )}
+      {helperText && !error && (
+        <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: colors.text.secondary }}>
+          {helperText}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Divider() {
   return <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb', margin: '1rem 0' }} />;
 }
@@ -419,7 +501,11 @@ export function Link({
     <a 
       href={href} 
       target={target}
-      style={{ textDecoration: underline ? 'underline' : 'none', color: '#6366f1' }}
+      style={{ 
+        textDecoration: underline ? 'underline' : 'none', 
+        color: colors.primary[600],
+        transition: 'color 0.2s ease',
+      }}
       {...props}
     >
       {children}
@@ -524,16 +610,17 @@ export function Avatar({
         width: sizeMap[size], 
         height: sizeMap[size], 
         borderRadius: '50%', 
-        backgroundColor: '#6366f1',
+        backgroundColor: colors.primary[600],
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'white',
+        color: colors.background.light,
+        fontWeight: 600,
         ...attributes?.style 
       }}
     >
       {src ? (
-        <img src={src} alt={name} style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+        <img src={src} alt={name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
       ) : (
         <span>{getInitials ? getInitials(name) : name[0]}</span>
       )}

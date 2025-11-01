@@ -6,7 +6,7 @@ import { ChainProvider } from '@/components/wallet/ChainProvider';
 function CreateInterchainApp({ Component, pageProps }: AppProps) {
   return (
     <ChainProvider>
-      <div style={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
+      <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
         <Component {...pageProps} />
       </div>
     </ChainProvider>

@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Stack, Button as UIButton, Text, useColorModeValue } from '@/components/ui';
+import { Box, Stack, Button as UIButton, Text, Input, useColorModeValue } from '@/components/ui';
 import { QRCodeSVG } from 'qrcode.react';
 import { useChain } from '@/components/wallet/ChainProvider';
 import { WalletStatus } from '@/components/wallet/ChainProvider';
 import { Bill } from '@/pages/api/bills';
 import { formatAmount } from '@/utils/wallet';
 import { ButtonConnect, ButtonConnected, ButtonConnecting, ButtonDisconnected } from '@/components/wallet/Connect';
+import { Layout } from '@/components';
+import { colors } from '@/config/colors';
 
 function MerchantDashboardContent() {
   const { 
@@ -15,7 +17,7 @@ function MerchantDashboardContent() {
     connect, 
     openView,
     disconnect 
-  } = useChain('noble'); // Merchant uses Keplr (Cosmos wallet) - receives USDC on Noble
+  } = useChain('noble');
   
   const [billAmount, setBillAmount] = useState('');
   const [currentBill, setCurrentBill] = useState<Bill | null>(null);
@@ -23,46 +25,32 @@ function MerchantDashboardContent() {
   const [error, setError] = useState('');
   const hasAttemptedAutoConnect = useRef(false);
 
-  // Track connection state in localStorage
   useEffect(() => {
     if (status === WalletStatus.Connected) {
       localStorage.setItem('wallet_connected', 'true');
     } else if (status === WalletStatus.Rejected) {
-      // Clear connection state if user rejected
       localStorage.removeItem('wallet_connected');
     }
   }, [status]);
 
-  // Auto-connect wallet on mount if previously connected
   useEffect(() => {
     if (hasAttemptedAutoConnect.current) return;
     
     const wasConnected = localStorage.getItem('wallet_connected');
     if (wasConnected === 'true' && status === WalletStatus.Disconnected) {
       hasAttemptedAutoConnect.current = true;
-      // Small delay to ensure wallet extension is ready
       const timer = setTimeout(() => {
         connect();
       }, 500);
       return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]); // Check when status becomes available
-
-  // Call hooks at top level
-  const bgColor = useColorModeValue('$white', '$blackAlpha500');
-  const boxShadow = useColorModeValue(
-    '0 0 2px #dfdfdf, 0 0 6px -2px #d3d3d3',
-    '0 0 2px #363636, 0 0 8px -2px #4f4f4f'
-  );
-  const qrBgColor = useColorModeValue('$gray100', '$gray800');
+  }, [status]);
 
   useEffect(() => {
-    // Poll for bill updates
     if (currentBill) {
       const interval = setInterval(() => {
         fetchBill(currentBill.id);
-      }, 3000); // Poll every 3 seconds
+      }, 3000);
 
       return () => clearInterval(interval);
     }
@@ -75,7 +63,7 @@ function MerchantDashboardContent() {
         const bill = await res.json();
         setCurrentBill(bill);
         if (bill.remainingAmount === '0') {
-          // Bill is paid, stop polling
+          // Bill is paid
         }
       }
     } catch (err) {
@@ -85,7 +73,13 @@ function MerchantDashboardContent() {
 
   const createBill = async () => {
     if (!billAmount || !address) {
-      setError('Please enter an amount and connect your Keplr wallet');
+      setError('Please enter an amount and connect your wallet');
+      return;
+    }
+
+    const amount = parseFloat(billAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setError('Please enter a valid amount');
       return;
     }
 
@@ -93,16 +87,15 @@ function MerchantDashboardContent() {
     setError('');
 
     try {
-      // Convert amount to USDC (6 decimals)
-      const amount = (parseFloat(billAmount) * 1_000_000).toString();
+      const amountInUSDC = (amount * 1_000_000).toString();
 
       const res = await fetch('/api/bills', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          merchantAddress: address, // Noble address (Cosmos address from Keplr)
-          merchantChainId: chain.chainName ? `${chain.chainName}-1` : 'noble-1', // Noble chain ID
-          totalAmount: amount,
+          merchantAddress: address,
+          merchantChainId: chain.chainName ? `${chain.chainName}-1` : 'noble-1',
+          totalAmount: amountInUSDC,
         }),
       });
 
@@ -127,182 +120,460 @@ function MerchantDashboardContent() {
     return '';
   };
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
   const remainingAmount = currentBill ? formatAmount(currentBill.remainingAmount) : '0';
   const totalAmount = currentBill ? formatAmount(currentBill.totalAmount) : '0';
   const isPaid = currentBill && currentBill.remainingAmount === '0';
+  const paidPercentage = currentBill 
+    ? ((parseFloat(currentBill.totalAmount) - parseFloat(currentBill.remainingAmount)) / parseFloat(currentBill.totalAmount)) * 100 
+    : 0;
 
   return (
-    // @ts-ignore
-    <Box
-      py="$16"
-      px="$8"
-      maxWidth="800px"
-      mx="auto"
-    >
-      <Stack direction="vertical" space="$8">
-        {/* @ts-ignore */}
-        <Box>
-          <Text 
-            fontSize="$xl" 
-            fontWeight="$bold" 
-            attributes={{ mb: '$4' }}
-          >
-            Merchant Dashboard
-          </Text>
-          <Stack direction="horizontal" space="$4" attributes={{ alignItems: 'center', mb: '$4' }}>
-            <Text fontSize="$sm" color="$gray500">
-              {address ? `Connected: ${address.slice(0, 8)}...${address.slice(-6)}` : 'Please connect your Keplr wallet'}
-            </Text>
-            {/* @ts-ignore */}
-            <Box>
-              {status === WalletStatus.Connected ? (
-                // @ts-ignore
-                <ButtonConnected onClick={openView} />
-              ) : status === WalletStatus.Connecting ? (
-                // @ts-ignore
-                <ButtonConnecting />
-              ) : (
-                // @ts-ignore
-                <ButtonDisconnected onClick={connect} />
-              )}
-            </Box>
-          </Stack>
-        </Box>
-
-        {!currentBill ? (
-          // @ts-ignore
-          <Box
-            p="$8"
-            borderRadius="$lg"
-            backgroundColor={bgColor}
-            boxShadow={boxShadow}
-          >
-            <Stack direction="vertical" space="$4">
-              <Text fontSize="$md" fontWeight="$semibold">
-                Create New Bill
-              </Text>
-              <Text fontSize="$sm" color="$gray500">
-                You will receive USDC on Noble via Skip Go
-              </Text>
-              <input
-                type="number"
-                placeholder="Enter bill amount (USDC)"
-                value={billAmount}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBillAmount(e.target.value)}
-                step="0.01"
-                min="0"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  border: '1px solid #ccc',
-                  fontSize: '16px',
-                }}
-              />
-              {error && (
-                <Text fontSize="$sm" color="$red500">
-                  {error}
-                </Text>
-              )}
-              <UIButton
-                onClick={createBill}
-                disabled={loading || !address}
-                isLoading={loading}
+    <Layout>
+      <Box py="$24" px="$8" maxWidth="950px" mx="auto">
+        <Stack direction="vertical" space="$10">
+          {/* Header Section */}
+          <Box>
+            <Stack direction="vertical" space="$6">
+              <Text 
+                fontSize="$5xl" 
+                fontWeight="$bold" 
+                style={{ marginBottom: '0.5rem' }}
                 domAttributes={{
                   style: {
-                    backgroundImage: 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
+                    background: 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    fontSize: '2.5rem',
+                    lineHeight: '1.2',
                   },
                 }}
               >
-                Create Bill
-              </UIButton>
+                Merchant Dashboard
+              </Text>
+              
+              {/* Wallet Connection Card */}
+              <Box
+                p="$6"
+                borderRadius="$xl"
+                backgroundColor="$white"
+                style={{
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  border: `1px solid ${colors.border.light}`,
+                  background: status === WalletStatus.Connected 
+                    ? `linear-gradient(135deg, ${colors.success[50]} 0%, ${colors.background.light} 100%)`
+                    : colors.background.light,
+                }}
+              >
+                <Stack direction="horizontal" space="$4" attributes={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                  <Stack direction="horizontal" space="$3" attributes={{ alignItems: 'center' }}>
+                    <Box
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '12px',
+                        backgroundColor: status === WalletStatus.Connected ? colors.success[100] : colors.gray[100],
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: status === WalletStatus.Connected ? colors.success[600] : colors.gray[400],
+                        fontSize: '24px',
+                      }}
+                    >
+                      💼
+                    </Box>
+                    <Box>
+                      <Text fontSize="$xs" color="$gray500" style={{ marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                        Wallet Status
+                      </Text>
+                      <Text fontSize="$lg" fontWeight="$semibold" color={status === WalletStatus.Connected ? colors.success[700] : colors.gray[700]}>
+                        {address ? (
+                          <>
+                            Connected: {address.slice(0, 10)}...{address.slice(-8)}
+                          </>
+                        ) : (
+                          'Please connect your Keplr wallet'
+                        )}
+                      </Text>
+                    </Box>
+                  </Stack>
+                  <Box>
+                    {status === WalletStatus.Connected ? (
+                      <ButtonConnected onClick={openView} />
+                    ) : status === WalletStatus.Connecting ? (
+                      <ButtonConnecting />
+                    ) : (
+                      <ButtonDisconnected onClick={connect} />
+                    )}
+                  </Box>
+                </Stack>
+              </Box>
             </Stack>
           </Box>
-        ) : (
-          // @ts-ignore
-          <Box
-            p="$8"
-            borderRadius="$lg"
-            backgroundColor={bgColor}
-            boxShadow={boxShadow}
-          >
-            <Stack 
-              direction="vertical" 
-              space="$6" 
-              attributes={{ alignItems: 'center' }}
+
+          {!currentBill ? (
+            /* Create Bill Card */
+            <Box
+              p="$12"
+              borderRadius="$2xl"
+              backgroundColor="$white"
+              style={{
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                border: `1px solid ${colors.border.light}`,
+                position: 'relative',
+                overflow: 'hidden',
+              }}
             >
-              {isPaid ? (
-                <>
-                  <Text fontSize="$2xl" fontWeight="$bold" color="$green500">
-                    Thank You!
-                  </Text>
-                  <Text fontSize="$md" color="$gray500">
-                    Bill has been fully paid
-                  </Text>
-                  <UIButton
-                    onClick={() => {
-                      setCurrentBill(null);
-                      setBillAmount('');
-                    }}
-                    domAttributes={{
-                      style: {
-                        backgroundImage: 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
-                      },
-                    }}
-                  >
-                    Create New Bill
-                  </UIButton>
-                </>
-              ) : (
-                <>
-                  <Text fontSize="$xl" fontWeight="$bold">
-                    Bill #{currentBill.id.slice(0, 8)}
-                  </Text>
-                  <Stack 
-                    direction="vertical" 
-                    space="$2" 
-                    attributes={{ alignItems: 'center' }}
-                  >
-                    <Text fontSize="$lg" color="$gray500">
-                      Total: {totalAmount} USDC
-                    </Text>
-                    <Text fontSize="$lg" fontWeight="$bold">
-                      Remaining: {remainingAmount} USDC
+              {/* Decorative gradient accent */}
+              <Box
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '4px',
+                  background: 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
+                }}
+              />
+              
+              <Stack direction="vertical" space="$8">
+                <Box>
+                  <Stack direction="horizontal" space="$3" attributes={{ alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <Box
+                      style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '12px',
+                        backgroundColor: colors.primary[100],
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: colors.primary[600],
+                      }}
+                    >
+                      💵
+                    </Box>
+                    <Text fontSize="$3xl" fontWeight="$bold" style={{ color: colors.text.primary }}>
+                      Create New Bill
                     </Text>
                   </Stack>
-                  {/* @ts-ignore */}
-                  <Box
-                    p="$6"
-                    borderRadius="$md"
-                    backgroundColor={qrBgColor}
-                  >
-                    {/* @ts-ignore */}
-                    <QRCodeSVG
-                      value={getPaymentUrl(currentBill.id)}
-                      size={256}
-                      level="M"
-                      includeMargin={true}
-                    />
-                  </Box>
-                  <Text fontSize="$sm" color="$gray500" textAlign="center">
-                    Scan this QR code to pay
+                  <Text fontSize="$md" color="$gray600" style={{ marginLeft: '60px', lineHeight: '1.6' }}>
+                    Receive payments in USDC on Noble chain via Skip Protocol
                   </Text>
-                  <Text fontSize="$xs" color="$gray400" textAlign="center" fontFamily="mono">
-                    {getPaymentUrl(currentBill.id)}
-                  </Text>
-                </>
-              )}
-            </Stack>
-          </Box>
-        )}
-      </Stack>
-    </Box>
+                </Box>
+
+                <Box>
+                  <Input
+                    type="number"
+                    label="Bill Amount"
+                    placeholder="0.00"
+                    value={billAmount}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setBillAmount(e.target.value);
+                      setError('');
+                    }}
+                    step="0.01"
+                    min="0"
+                    error={error}
+                    helperText="Enter the amount in USDC"
+                    style={{
+                      fontSize: '1.5rem',
+                      fontWeight: 600,
+                      padding: '1rem 1.25rem',
+                    }}
+                  />
+                </Box>
+
+                <UIButton
+                  onClick={createBill}
+                  disabled={loading || !address || !billAmount}
+                  isLoading={loading}
+                  size="lg"
+                  domAttributes={{
+                    style: {
+                      backgroundImage: 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
+                      width: '100%',
+                      fontSize: '1.125rem',
+                      fontWeight: 600,
+                      padding: '1.125rem 2rem',
+                      boxShadow: '0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.2)',
+                      transition: 'all 0.2s ease',
+                    },
+                  }}
+                >
+                  Create Bill
+                </UIButton>
+              </Stack>
+            </Box>
+          ) : (
+            /* Bill Display Card */
+            <Box
+              p="$12"
+              borderRadius="$2xl"
+              backgroundColor="$white"
+              style={{
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                border: `1px solid ${colors.border.light}`,
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Decorative gradient accent */}
+              <Box
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '4px',
+                  background: isPaid 
+                    ? `linear-gradient(90deg, ${colors.success[400]} 0%, ${colors.success[600]} 100%)`
+                    : 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
+                }}
+              />
+              
+              <Stack direction="vertical" space="$10" attributes={{ alignItems: 'center' }}>
+                {isPaid ? (
+                  <>
+                    <Box
+                      style={{
+                        width: '96px',
+                        height: '96px',
+                        borderRadius: '50%',
+                        background: `linear-gradient(135deg, ${colors.success[400]} 0%, ${colors.success[600]} 100%)`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: '1rem',
+                        boxShadow: `0 10px 25px -5px ${colors.success[300]}`,
+                      }}
+                    >
+                      ✓
+                    </Box>
+                    <Box style={{ textAlign: 'center' }}>
+                      <Text fontSize="$4xl" fontWeight="$bold" color={colors.success[600]} style={{ marginBottom: '0.75rem' }}>
+                        Payment Complete!
+                      </Text>
+                      <Text fontSize="$lg" color="$gray600" style={{ marginBottom: '2rem', lineHeight: '1.6' }}>
+                        Thank you for using FissionPay. Your payment has been successfully processed.
+                      </Text>
+                      <UIButton
+                        onClick={() => {
+                          setCurrentBill(null);
+                          setBillAmount('');
+                        }}
+                        size="lg"
+                        domAttributes={{
+                          style: {
+                            backgroundImage: 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
+                            minWidth: '240px',
+                            fontSize: '1.125rem',
+                            fontWeight: 600,
+                            padding: '1rem 2rem',
+                            boxShadow: '0 10px 15px -3px rgba(124, 58, 237, 0.3), 0 4px 6px -2px rgba(124, 58, 237, 0.2)',
+                          },
+                        }}
+                      >
+                        Create New Bill
+                      </UIButton>
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    <Box style={{ width: '100%', textAlign: 'center' }}>
+                      <Box
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '9999px',
+                          backgroundColor: colors.primary[50],
+                          color: colors.primary[700],
+                          fontSize: '0.875rem',
+                          fontWeight: 600,
+                          marginBottom: '1rem',
+                        }}
+                      >
+                        Bill #{currentBill.id.slice(0, 8)}
+                      </Box>
+                      <Text fontSize="$xl" fontWeight="$bold" style={{ marginBottom: '0.5rem', color: colors.text.primary }}>
+                        Active Payment Request
+                      </Text>
+                      <Text fontSize="$sm" color="$gray500" style={{ lineHeight: '1.6' }}>
+                        Share this QR code or payment link with your customer
+                      </Text>
+                    </Box>
+
+                    {/* Payment Progress */}
+                    <Box style={{ width: '100%', padding: '1.5rem', borderRadius: '1rem', backgroundColor: colors.gray[50] }}>
+                      <Stack direction="horizontal" attributes={{ justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                        <Text fontSize="$sm" color="$gray600" fontWeight="$semibold" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Payment Progress
+                        </Text>
+                        <Text fontSize="$sm" color="$gray600" fontWeight="$bold" style={{ color: colors.primary[600] }}>
+                          {paidPercentage.toFixed(1)}% Paid
+                        </Text>
+                      </Stack>
+                      <Box
+                        style={{
+                          width: '100%',
+                          height: '12px',
+                          backgroundColor: colors.gray[200],
+                          borderRadius: '9999px',
+                          overflow: 'hidden',
+                          marginBottom: '1.5rem',
+                          boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            width: `${paidPercentage}%`,
+                            height: '100%',
+                            background: 'linear-gradient(109.6deg, rgba(157,75,199,1) 11.2%, rgba(119,81,204,1) 83.1%)',
+                            borderRadius: '9999px',
+                            transition: 'width 0.5s ease',
+                            boxShadow: '0 2px 4px rgba(124, 58, 237, 0.3)',
+                          }}
+                        />
+                      </Box>
+                      <Stack direction="horizontal" attributes={{ justifyContent: 'space-between' }}>
+                        <Box>
+                          <Text fontSize="$xs" color="$gray500" style={{ marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                            Total Amount
+                          </Text>
+                          <Text fontSize="$2xl" fontWeight="$bold" color="$gray900">
+                            {totalAmount} USDC
+                          </Text>
+                        </Box>
+                        <Box style={{ textAlign: 'right' }}>
+                          <Text fontSize="$xs" color="$gray500" style={{ marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                            Remaining
+                          </Text>
+                          <Text fontSize="$2xl" fontWeight="$bold" color={colors.primary[600]}>
+                            {remainingAmount} USDC
+                          </Text>
+                        </Box>
+                      </Stack>
+                    </Box>
+
+                    {/* QR Code */}
+                    <Box
+                      p="$10"
+                      borderRadius="$xl"
+                      backgroundColor="$white"
+                      style={{
+                        border: `2px solid ${colors.border.light}`,
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        background: `linear-gradient(135deg, ${colors.background.light} 0%, ${colors.gray[50]} 100%)`,
+                      }}
+                    >
+                      <QRCodeSVG
+                        value={getPaymentUrl(currentBill.id)}
+                        size={280}
+                        level="M"
+                        includeMargin={true}
+                      />
+                    </Box>
+
+                    {/* Payment Link */}
+                    <Box style={{ width: '100%' }}>
+                      <Text fontSize="$sm" color="$gray600" fontWeight="$semibold" textAlign="center" style={{ marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Payment Link
+                      </Text>
+                      <Box
+                        p="$4"
+                        borderRadius="$lg"
+                        backgroundColor="$gray50"
+                        style={{
+                          border: `1px solid ${colors.border.light}`,
+                          fontFamily: 'monospace',
+                          fontSize: '0.875rem',
+                          wordBreak: 'break-all',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '0.75rem',
+                          backgroundColor: colors.gray[50],
+                        }}
+                      >
+                        <Text style={{ color: colors.text.secondary, flex: 1 }}>
+                          {getPaymentUrl(currentBill.id)}
+                        </Text>
+                        <Stack direction="horizontal" space="$2">
+                          <button
+                            onClick={() => copyToClipboard(getPaymentUrl(currentBill.id))}
+                            style={{
+                              padding: '0.5rem',
+                              borderRadius: '0.375rem',
+                              border: `1px solid ${colors.border.light}`,
+                              backgroundColor: colors.background.light,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: colors.text.secondary,
+                              transition: 'all 0.2s ease',
+                              fontSize: '16px',
+                            }}
+                            onMouseEnter={(e: any) => {
+                              e.currentTarget.style.backgroundColor = colors.gray[100];
+                              e.currentTarget.style.color = colors.primary[600];
+                            }}
+                            onMouseLeave={(e: any) => {
+                              e.currentTarget.style.backgroundColor = colors.background.light;
+                              e.currentTarget.style.color = colors.text.secondary;
+                            }}
+                            title="Copy link"
+                          >
+                            📋
+                          </button>
+                          <a
+                            href={getPaymentUrl(currentBill.id)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              padding: '0.5rem',
+                              borderRadius: '0.375rem',
+                              border: `1px solid ${colors.border.light}`,
+                              backgroundColor: colors.background.light,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: colors.text.secondary,
+                              textDecoration: 'none',
+                              transition: 'all 0.2s ease',
+                              fontSize: '16px',
+                            }}
+                            onMouseEnter={(e: any) => {
+                              e.currentTarget.style.backgroundColor = colors.gray[100];
+                              e.currentTarget.style.color = colors.primary[600];
+                            }}
+                            onMouseLeave={(e: any) => {
+                              e.currentTarget.style.backgroundColor = colors.background.light;
+                              e.currentTarget.style.color = colors.text.secondary;
+                            }}
+                            title="Open in new tab"
+                          >
+                            🔗
+                          </a>
+                        </Stack>
+                      </Box>
+                    </Box>
+                  </>
+                )}
+              </Stack>
+            </Box>
+          )}
+        </Stack>
+      </Box>
+    </Layout>
   );
 }
 
-export default function MerchantDashboard() {
-  return (
-    // @ts-ignore
-    <MerchantDashboardContent />
-  );
-}
+export default MerchantDashboardContent;

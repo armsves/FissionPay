@@ -5,6 +5,7 @@ import {
   useColorModeValue,
 } from "@/components/ui";
 import Link from "next/link";
+import Image from "next/image";
 
 export function Header() {
   const borderColor = useColorModeValue("$gray200", "$gray700");
@@ -19,16 +20,20 @@ export function Header() {
       borderBottomColor={borderColor}
       backgroundColor={bgColor}
       attributes={{
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
+        style: {
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          backdropFilter: "blur(10px)",
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
+        },
       }}
     >
       <Box
         maxWidth="1200px"
         mx="auto"
         px="$8"
-        py="$6"
+        py="$4"
       >
         <Stack
           direction="horizontal"
@@ -38,12 +43,29 @@ export function Header() {
             justifyContent: "space-between",
           }}
         >
-          <Link href="/" style={{ textDecoration: "none" }}>
+          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
             <Stack
               direction="horizontal"
               space="$3"
               attributes={{ alignItems: "center" }}
             >
+              <Box
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  position: "relative",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }}
+              >
+                <Image
+                  src="/FissionPay-logo.png"
+                  alt="FissionPay Logo"
+                  width={40}
+                  height={40}
+                  style={{ objectFit: "contain" }}
+                />
+              </Box>
               <Text
                 fontSize="$2xl"
                 fontWeight="$bold"
@@ -70,6 +92,7 @@ export function Header() {
             <Link href="/merchant">
               <Text
                 fontSize="$md"
+                fontWeight="$medium"
                 color={{
                   base: useColorModeValue("$gray700", "$gray300"),
                   hover: useColorModeValue("$purple600", "$purple300"),
@@ -77,6 +100,7 @@ export function Header() {
                 domAttributes={{
                   style: {
                     cursor: "pointer",
+                    transition: "color 0.2s ease",
                   },
                 }}
               >
