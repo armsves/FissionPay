@@ -1,0 +1,50 @@
+{
+  "name": "@hyperweb/connect-multi-chain",
+  "version": "2.4.6",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "overrides": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9"
+  },
+  "dependencies": {
+    "@chain-registry/v2-types": "^0.53.146",
+    "@emotion/react": "11.10.6",
+    "@emotion/styled": "11.10.6",
+    "@interchain-kit/core": "0.3.55",
+    "@interchain-kit/keplr-extension": "0.3.55",
+    "@interchain-kit/leap-extension": "0.3.55",
+    "@interchain-kit/react": "0.3.55",
+    "@interchain-ui/react": "^1.26.3",
+    "@interchain-ui/react-no-ssr": "^0.1.6",
+    "@skip-go/client": "^1.5.9",
+    "@tanstack/react-query": "^5.90.5",
+    "fast-fuzzy": "1.12.0",
+    "framer-motion": "12.23.24",
+    "interchain-kit": "0.3.55",
+    "match-sorter": "^8.1.0",
+    "next": "^16.0.1",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-icons": "5.5.0",
+    "uuid": "^13.0.0",
+    "viem": "^2.38.5",
+    "wagmi": "^2.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.2",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.1",
+    "eslint": "9.39.0",
+    "eslint-config-next": "16.0.1",
+    "typescript": "^5.1.6"
+  }
+}
